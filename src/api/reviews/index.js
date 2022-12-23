@@ -12,27 +12,23 @@
 
 import express from "express";
 import uniqid from "uniqid";
-import httpErrors from "http-errors";
-import { checksProductsSchema, triggerBadRequest } from "./validator.js";
-import { getproducts, writeproducts } from "../../lib/fs-tools.js";
 
-const { NotFound, Unauthorized, BadRequest } = httpErrors;
+import { getReviews, writeReviews } from "../../lib/fs-tools.js";
 
-const booksRouter = express.Router();
+const reviewRouter = express.Router();
 
-booksRouter.post(
+reviewRouter.post(
   "/",
-  checksProductsSchema,
-  triggerBadRequest,
+
   async (req, res, next) => {
     try {
       const newBook = { ...req.body, createdAt: new Date(), id: uniqid() };
 
-      const productsArray = await getproducts();
+      const reviewsArray = await getReviews();
 
-      productsArray.push(newBook);
+      reviewsArray.push(newBook);
 
-      await writeproducts(productsArray);
+      await writeReviews(reviewsArray);
 
       res.status(201).send({ id: newBook.id });
     } catch (error) {
@@ -41,28 +37,28 @@ booksRouter.post(
   }
 );
 
-booksRouter.get("/", async (req, res, next) => {
+reviewRouter.get("/", async (req, res, next) => {
   try {
     // throw new Error("KABOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOM")
-    const productsArray = await getproducts();
+    const reviewsArray = await getReviews();
 
-    console.log("Products array: ", productsArray);
+    console.log("reviews array: ", reviewsArray);
     if (req.query && req.query.category) {
-      const filteredBooks = productsArray.filter(
+      const filteredBooks = reviewsArray.filter(
         (book) => book.category === req.query.category
       );
       res.send(filteredBooks);
     } else {
-      res.send({ productsArray });
+      res.send({ reviewsArray });
     }
   } catch (error) {
     next(error);
   }
 });
 
-booksRouter.get("/:bookId", async (req, res, next) => {
+reviewRouter.get("/:bookId", async (req, res, next) => {
   try {
-    const books = await getproducts();
+    const books = await getReviews();
     const book = books.find((book) => book.id === req.params.bookId);
     if (book) {
       res.send(book);
@@ -77,9 +73,9 @@ booksRouter.get("/:bookId", async (req, res, next) => {
   }
 });
 
-booksRouter.put("/:bookId", async (req, res, next) => {
+reviewRouter.put("/:bookId", async (req, res, next) => {
   try {
-    const books = await getproducts();
+    const books = await getReviews();
 
     const index = books.findIndex((book) => book.id === req.params.bookId);
     if (index !== -1) {
@@ -89,7 +85,7 @@ booksRouter.put("/:bookId", async (req, res, next) => {
 
       books[index] = updatedBook;
 
-      await writeproducts(books);
+      await writeReviews(books);
       res.send(updatedBook);
     } else {
       next(NotFound(`Book with id ${req.params.bookId} not found!`));
@@ -99,16 +95,16 @@ booksRouter.put("/:bookId", async (req, res, next) => {
   }
 });
 
-booksRouter.delete("/:bookId", async (req, res, next) => {
+reviewRouter.delete("/:bookId", async (req, res, next) => {
   try {
-    const books = await getproducts();
+    const books = await getReviews();
 
     const remainingBooks = books.filter(
       (book) => book.id !== req.params.bookId
     );
 
     if (books.length !== remainingBooks.length) {
-      await writeproducts(remainingBooks);
+      await writeReviews(remainingBooks);
       res.status(204).send();
     } else {
       next(NotFound(`Book with id ${req.params.bookId} not found!`));
@@ -118,4 +114,4 @@ booksRouter.delete("/:bookId", async (req, res, next) => {
   }
 });
 
-export default booksRouter;
+export default reviewRouter;

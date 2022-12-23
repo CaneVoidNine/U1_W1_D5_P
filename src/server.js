@@ -4,7 +4,8 @@ import listEndpoints from "express-list-endpoints";
 import cors from "cors";
 import { join } from "path";
 import productsRouter from "./api/products/index.js";
-// import booksRouter from "./api/books/index.js"
+
+import reviewsRouter from "./api/reviews/index.js";
 // import filesRouter from "./api/files/index.js"
 import {
   genericErrorHandler,
@@ -46,8 +47,8 @@ server.use(loggerMiddleware);
 server.use(express.json()); // If you do not add this line here BEFORE the endpoints, all req.body will be UNDEFINED
 
 // ****************** ENDPOINTS *********************
-server.use("/products", loggerMiddleware, productsRouter); // All users related endpoints will share the same /users prefix in their urls
-// server.use("/books", loggerMiddleware, booksRouter)
+server.use("/products", productsRouter); // All users related endpoints will share the same /users prefix in their urls
+server.use("/reviews", reviewsRouter);
 // server.use("/files", loggerMiddleware, filesRouter)
 
 // ****************** ERROR HANDLERS ****************
