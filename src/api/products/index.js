@@ -63,9 +63,15 @@ booksRouter.get("/", async (req, res, next) => {
 booksRouter.get("/:bookId", async (req, res, next) => {
   try {
     const books = await getproducts();
+    const reviews = await getReviews();
     const book = books.find((book) => book.id === req.params.bookId);
+    const review = reviews.find(
+      (review) => review.productId === req.params.bookId
+    );
+
+    const both = Object.assign(book, review);
     if (book) {
-      res.send(book);
+      res.send(both);
     } else {
       // next(createHttpError(404, `Book with id ${req.params.bookId} not found!`))
       next(NotFound(`Book with id ${req.params.bookId} not found!`)); // --> err object {status: 404, message: `Book with id ${req.params.bookId} not found!` }
