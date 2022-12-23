@@ -14,7 +14,7 @@ import express from "express";
 import uniqid from "uniqid";
 import httpErrors from "http-errors";
 import { checksProductsSchema, triggerBadRequest } from "./validator.js";
-import { getproducts, writeproducts } from "../../lib/fs-tools.js";
+import { getproducts, getReviews, writeproducts } from "../../lib/fs-tools.js";
 
 const { NotFound, Unauthorized, BadRequest } = httpErrors;
 
@@ -45,7 +45,7 @@ booksRouter.get("/", async (req, res, next) => {
   try {
     // throw new Error("KABOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOM")
     const productsArray = await getproducts();
-
+    const reviewsArray = await getReviews();
     console.log("Products array: ", productsArray);
     if (req.query && req.query.category) {
       const filteredBooks = productsArray.filter(
@@ -53,7 +53,7 @@ booksRouter.get("/", async (req, res, next) => {
       );
       res.send(filteredBooks);
     } else {
-      res.send({ productsArray });
+      res.send({ productsArray, reviewsArray });
     }
   } catch (error) {
     next(error);
